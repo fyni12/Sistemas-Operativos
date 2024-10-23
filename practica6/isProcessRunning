@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    exit -1
+else
+    
+    a=$(ps -ef | awk '{print $2}' | grep $1 | wc -l)
+    exit $a
+fi
