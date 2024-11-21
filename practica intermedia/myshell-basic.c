@@ -18,10 +18,9 @@ int intentoSalida = 0;
 
 void handler();
 
-void executeOne(char **tokens, int entrada, int salida);
-int executeSecondPlane(char **tokens, int entrada, int salida);
+void executeOne(char **tokens);
 char *trim(char *str);
-void executePipes(char **tokens, int tokensLenght);
+
 
 void genericTokenize(char *str, char **tokens, int *num_tokens, char *separator)
 {
@@ -74,9 +73,9 @@ int main()
         if (len != 0 && intentoSalida == 0)
         {
 
-            genericTokenize(str, tokens, &num_tokens, "|");
+            genericTokenize(str, tokens, &num_tokens, " ");
 
-            executePipes(tokens, num_tokens);
+            executeOne(tokens);
         }
         intentoSalida = 0;
     }
@@ -87,18 +86,18 @@ void handler()
 {
     char eleccion;
 
-    printf("\nsalir y/n:");
+    printf("\nsalir s/n:");
     fflush(stdin);
     scanf("%c", &eleccion);
     intentoSalida = 1;
-    if (eleccion == 'y')
+    if (eleccion == 's')
     {
         printf("saliendo\n");
         bucle = 0;
     }
 }
 
-void executeOne(char **tokens, int entrada, int salida)
+void executeOne(char **tokens)
 {
 
     int result;
@@ -107,9 +106,6 @@ void executeOne(char **tokens, int entrada, int salida)
     if (hijo == 0)
     {
 
-        dup2(entrada, STDIN_FILENO);
-
-        dup2(salida, STDOUT_FILENO);
 
         if (execvp(tokens[0], tokens) == -1)
             printf(" Error al ejecutar el comando ' %s ': %s \n ", tokens[0], strerror(errno));
@@ -121,23 +117,6 @@ void executeOne(char **tokens, int entrada, int salida)
         wait(&result);
     }
 }
-
-int executeSecondPlane(char **tokens, int entrada, int salida)
-{
-
-    int hijo = fork();
-    if (hijo == 0)
-    {
-        dup2(entrada, STDIN_FILENO);
-        dup2(salida, STDOUT_FILENO);
-
-        if (execvp(tokens[0], tokens) == -1)
-            printf(" Error al ejecutar el comando ' %s ': %s \n ", tokens[0], strerror(errno));
-        exit(-1);
-    }
-    return hijo;
-}
-
 
 char *trim(char *str)
 {
@@ -170,74 +149,4 @@ char *trim(char *str)
     }
     return str;
 }
-
-void executePipes(char **tokens, int tokensLenght)
-{
-    char *subTokens[MAX_TOKENS];
-    int subNum_tokens;
-
-    if (tokensLenght == 1)
-    {
-        genericTokenize(tokens[tokensLenght - 1], subTokens, &subNum_tokens, " ");
-
-        if (subTokens[subNum_tokens - 1][strlen(subTokens[subNum_tokens - 1]) - 1] == '&')
-        {
-            subTokens[subNum_tokens - 1][strlen(subTokens[subNum_tokens - 1]) - 1] = '\0';
-            executeSecondPlane(subTokens, STDIN_FILENO, STDOUT_FILENO);
-        }
-        else
-        {
-            executeOne(subTokens, STDIN_FILENO, STDOUT_FILENO);
-        }
-    }
-    else
-    {
-        // reserva memoria para todas las tuberias
-        int **totalPipes;
-        totalPipes = (int **)malloc((tokensLenght - 1) * sizeof(int *));
-        for (int i = 0; i < tokensLenght - 1; i++)
-        {
-            totalPipes[i] = (int *)malloc(2 * sizeof(int));
-        }
-
-        for (int i = 0; i < tokensLenght - 1; i++)
-        {
-            pipe(totalPipes[i]);
-        }
-
-        // primer ejecutar y ultimo tienen que estar definidos a mano
-
-        for (int i = 0; i < tokensLenght; i++)
-        {
-            genericTokenize(tokens[i], subTokens, &subNum_tokens, " ");
-
-            if (i == 0)
-            {
-                executeSecondPlane(subTokens, STDIN_FILENO, totalPipes[i][1]);  //TODO PREGUNTAR SI ESTAS TIENEN QUE SER EN SEGUNDO PLANO
-                close(totalPipes[i][1]); // Cerramos el extremo de escritura que ya no se usa
-            }
-            else if (i == tokensLenght - 1)
-            {
-                if (subTokens[subNum_tokens - 1][strlen(subTokens[subNum_tokens - 1]) - 1] == '&')
-                {
-                    subTokens[subNum_tokens - 1][strlen(subTokens[subNum_tokens - 1]) - 1] = '\0';
-                    executeSecondPlane(subTokens, totalPipes[i - 1][0], STDOUT_FILENO);
-                }
-                else
-                {
-                    executeOne(subTokens, totalPipes[i - 1][0], STDOUT_FILENO);
-                }
-
-                close(totalPipes[i - 1][0]); // Cerramos el extremo de lectura que ya no se usa
-            }
-            else
-            {
-                executeSecondPlane(subTokens, totalPipes[i - 1][0], totalPipes[i][1]);
-                close(totalPipes[i - 1][0]); // Cerramos el extremo de lectura
-                close(totalPipes[i][1]);     // Cerramos el extremo de escritura
-            }
-        }
-    }
-}
-
 
