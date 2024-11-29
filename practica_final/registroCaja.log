@@ -1,0 +1,47 @@
+[ 29/ 11/ 24 13: 08: 13 ] Cliente 0: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 13 ] cajero 0: Atendiendo a  Cliente 0
+[ 29/ 11/ 24 13: 08: 14 ] cajero 0: acabo de atender a Cliente 0
+[ 29/ 11/ 24 13: 08: 22 ] Cliente 1: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 22 ] cajero 2: Atendiendo a  Cliente 1
+[ 29/ 11/ 24 13: 08: 23 ] Cliente 2: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 23 ] cajero 0: Atendiendo a  Cliente 2
+[ 29/ 11/ 24 13: 08: 23 ] Cliente 3: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 23 ] cajero 1: Atendiendo a  Cliente 3
+[ 29/ 11/ 24 13: 08: 23 ] cajero 2: acabo de atender a Cliente 1
+[ 29/ 11/ 24 13: 08: 23 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 23 ] Cliente 4: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 23 ] cajero 2: Atendiendo a  Cliente 4
+[ 29/ 11/ 24 13: 08: 24 ] cajero 0: acabo de atender a Cliente 2
+[ 29/ 11/ 24 13: 08: 24 ] Cliente 5: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 24 ] cajero 0: Atendiendo a  Cliente 5
+[ 29/ 11/ 24 13: 08: 24 ] reponedor: Cliente 3 quiere consultar un precio
+[ 29/ 11/ 24 13: 08: 24 ] yo: bucle
+[ 29/ 11/ 24 13: 08: 24 ] Cliente 6: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 24 ] cajero 2: acabo de atender a Cliente 4
+[ 29/ 11/ 24 13: 08: 24 ] cajero 2: Atendiendo a  Cliente 6
+[ 29/ 11/ 24 13: 08: 25 ] Cliente 7: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 25 ] cajero 0: acabo de atender a Cliente 5
+[ 29/ 11/ 24 13: 08: 25 ] cajero 0: Atendiendo a  Cliente 7
+[ 29/ 11/ 24 13: 08: 25 ] reponedor: se acabo de consultar el precio
+[ 29/ 11/ 24 13: 08: 25 ] cajero 1: acabo de atender a Cliente 3
+[ 29/ 11/ 24 13: 08: 25 ] Cliente 8: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 25 ] cajero 1: Atendiendo a  Cliente 8
+[ 29/ 11/ 24 13: 08: 25 ] cajero 2: acabo de atender a Cliente 6
+[ 29/ 11/ 24 13: 08: 25 ] Cliente 9: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 25 ] cajero 2: Atendiendo a  Cliente 9
+[ 29/ 11/ 24 13: 08: 26 ] cajero 0: acabo de atender a Cliente 7
+[ 29/ 11/ 24 13: 08: 26 ] Cliente 10: ha entrado a la tienda
+[ 29/ 11/ 24 13: 08: 26 ] cajero 0: Atendiendo a  Cliente 10
+[ 29/ 11/ 24 13: 08: 26 ] cajero 1: acabo de atender a Cliente 8
+[ 29/ 11/ 24 13: 08: 26 ] cajero 2: acabo de atender a Cliente 9
+[ 29/ 11/ 24 13: 08: 27 ] cajero 0: acabo de atender a Cliente 10
+[ 29/ 11/ 24 13: 08: 29 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 29 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 30 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 30 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 31 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 33 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 33 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 35 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 36 ] ERROR: no se encontro el cliente que se queria eliminar
+[ 29/ 11/ 24 13: 08: 37 ] ERROR: no se encontro el cliente que se queria eliminar
