@@ -7,7 +7,6 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <fcntl.h>
 #include <pthread.h>
 
@@ -43,6 +42,8 @@ void cleanLogger()
 
 void writeLog(char *id, char *msg)
 {
+
+    // esto es para calcular la hora a la que se escribe el log
     time_t now = time(0);
     struct tm *tlocal = localtime(&now);
     char stnow[25];
@@ -60,14 +61,17 @@ void writeLog(char *id, char *msg)
 int findClient(char *id) //! no tiene mutex
 {
     int pos = -1;
-    for (int i = 0; i < n_clientes; i++)
+    int i = 0;
+
+    while (i < n_clientes && pos == -1)
     {
         if (strcmp(cola[i].id, id) == 0)
         {
             pos = i;
-            break;
         }
+        i++;
     }
+
     return pos;
 }
 
@@ -87,31 +91,24 @@ void removeClient(int posicion) //! no tiene mutex
     cola[n_clientes - 1].estado = 0;
 }
 
-// void mostrarClientes()
-// {
-//     pthread_mutex_lock(&mutex_cola);
-
-//     for (int i = 0; i < n_clientes; i++)
-//     {
-//         printf("%d: %s  %d\n", i, cola[i].id, cola[i].estado);
-//     }
-//     pthread_mutex_unlock(&mutex_cola);
-// }
-
-void mostrarClientes() {
+void mostrarClientes()
+{
     pthread_mutex_lock(&mutex_cola);
 
-    for (int i = 0; i < n_clientes; i++) {
-        if (cola[i].id != NULL) { // Verifica que id está inicializado
+    for (int i = 0; i < n_clientes; i++)
+    {
+        if (cola[i].id != NULL)
+        {
             printf("%d: %s  %d\n", i, cola[i].id, cola[i].estado);
-        } else {
+        }
+        else
+        {
             printf("%d: Cliente no inicializado\n", i);
         }
     }
 
     pthread_mutex_unlock(&mutex_cola);
 }
-
 
 void *clientAlarm(void *id)
 {
@@ -144,7 +141,7 @@ void *clientAlarm(void *id)
     }
 }
 
-int findEmptyPos() //!NO TIENE MUTEX
+int findEmptyPos() //! NO TIENE MUTEX
 {
     int pos = -1;
     int i = 0;
@@ -173,24 +170,25 @@ void *createClient()
     pthread_mutex_lock(&mutex_cola);
     int pos = findEmptyPos();
 
-    if (strcmp(cola[pos].id, "vacio") == 0)
+    if (pos != -1)
     {
-        // TODO CUANTO TIEMPO ES EL MAX QUE TIENEN QUE ESPERAR?
-        // TODO LANZAS UN HILO AL QUE LE PASAS EL NOMBRE DEL HIJO, Y YA ESTÁ, Y BASICAMENTE QUE ESE HILO SIMULE UNA ALARMA
-
         pthread_t hilo;
+
+        // esto es para el logger
         char cli[20] = "Cliente ";
         char numero[20];
+
         sprintf(numero, "%d", numeroCliente);
         strcat(cli, numero);
 
-        printf("creando cliente %d en la posicion %d\n", numeroCliente, pos);
         strcpy(cola[pos].id, cli);
 
         cola[pos].estado = 0;
         numeroCliente++;
-        writeLog(cli, "ha entrado a la tienda");
         pthread_mutex_unlock(&mutex_cola);
+
+        writeLog(cli, "ha entrado a la tienda"); //TODO PROBLEMA CON QUE LOS CLIENTES A VECES MANDAN SU LOG DESPUES DE LOS CAJEROS
+        printf("creando cliente %d en la posicion %d\n", numeroCliente, pos);
 
         char *clidup = strdup(cli);
 
@@ -199,7 +197,6 @@ void *createClient()
     }
     else
     {
-
         pthread_mutex_unlock(&mutex_cola);
     }
 }
@@ -207,25 +204,24 @@ void *createClient()
 void handlerClient()
 {
     pthread_t hilo;
-
     pthread_create(&hilo, NULL, createClient, NULL);
     pthread_detach(hilo);
 }
 
 int clientAvaileable() //! NO TIENE MUTEX
 {
-
+    int i=0;
     int pos = -1;
-    for (int i = 0; i < n_clientes; i++)
-    { // TODO CAMBIAR A WHILE
 
+    while (i<n_clientes && pos==-1)
+    {
         if (strcmp(cola[i].id, "vacio") != 0 && cola[i].estado == 0)
         {
-
             pos = i;
-            break;
         }
+        i++;
     }
+    
     return pos;
 }
 
@@ -239,9 +235,7 @@ void *reponedor()
 
         pthread_cond_wait(&condicion_reponedor, &mutex_reponedor);
         int tiempo = rand() % 10 + 5; // tarda entre 5 y 15 segundos
-        //sleep(tiempo);
-
-        sleep(1);
+        // sleep(tiempo);
 
         pthread_cond_signal(&condicion_reponedor);
 
@@ -283,20 +277,17 @@ void *cajero(void *idCajero)
             probcliente = rand() % 101;
 
             // sleep(tiempoEspera);              //!HAY QUE HACER EL TIEMPO DE ESPERA
-            sleep(1);
 
             if (probcliente > 70 && probcliente <= 95)
             {
                 static int prioridad = 1;
 
+                sprintf(descripcionCajero, "%s solicita consultar un precio", idCliente);
+                writeLog("reponedor", descripcionCajero);
                 pthread_mutex_lock(&mutex_reponedor);
                 int var = prioridad;
                 prioridad++;
 
-                sprintf(descripcionCajero, "%s quiere consultar un precio", idCliente);
-                writeLog("reponedor", descripcionCajero);
-
-                    writeLog("yo", "bucle");
                 do
                 {
                     pthread_cond_signal(&condicion_reponedor);
@@ -309,12 +300,12 @@ void *cajero(void *idCajero)
 
                 prioridad--;
 
-                writeLog("reponedor", "se acabo de consultar el precio");
+                pthread_mutex_unlock(&mutex_reponedor);
+
+                writeLog("reponedor", "acaba de consultar el precio");
 
                 sprintf(descripcionCajero, "acabo de atender a %s", idCliente);
                 writeLog(idCajero, descripcionCajero);
-
-                pthread_mutex_unlock(&mutex_reponedor);
             }
             else if (probcliente > 95)
             {
@@ -344,13 +335,13 @@ void *cajero(void *idCajero)
 
         if (clientesAtendidos >= 10)
         {
+            writeLog(idCajero, "se tomará un descanso");
             clientesAtendidos = 0;
             sleep(20);
+            writeLog(idCajero, "vuelve del descanso");
         }
     }
 }
-
-
 
 int main()
 {
@@ -373,8 +364,6 @@ int main()
     struct sigaction sa;
     sa.sa_handler = handlerClient;
     sigaction(SIGUSR1, &sa, NULL);
-
-
 
     pthread_mutex_init(&mutex_log, NULL);
     pthread_mutex_init(&mutex_cola, NULL);
@@ -399,13 +388,16 @@ int main()
     pthread_create(&reponedor_hilo, NULL, reponedor, NULL);
     pthread_detach(reponedor_hilo);
 
-
+    for (int i = 0; i < 70; i++)
+    {
+        createClient();
+        sleep(.1f);
+    }
 
     while (1)
     {
         mostrarClientes();
         pause();
-
     }
 
     pthread_mutex_destroy(&mutex_log);
