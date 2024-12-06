@@ -475,6 +475,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-//! importante
-// TODO VOLVER A PONER LOS SLEEPS

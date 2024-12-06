@@ -1,0 +1,52 @@
+[ 06/ 12/ 24 16: 15: 51 ] SYSTEM: Se ha añadido un cajero
+[ 06/ 12/ 24 16: 15: 51 ] SYSTEM: Se ha añadido un cajero
+[ 06/ 12/ 24 16: 15: 51 ] SYSTEM: Se ha añadido un cajero
+[ 06/ 12/ 24 16: 16: 16 ] Cliente 0: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 16 ] cajero 1: Atendiendo a  Cliente 0
+[ 06/ 12/ 24 16: 16: 20 ] cajero 1: acabo de atender a Cliente 0
+[ 06/ 12/ 24 16: 16: 31 ] SYSTEM: Se ha aumentado la cola de clientes
+[ 06/ 12/ 24 16: 16: 41 ] SYSTEM: Se ha añadido un cajero
+[ 06/ 12/ 24 16: 16: 45 ] Cliente 1: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 45 ] cajero 4: Atendiendo a  Cliente 1
+[ 06/ 12/ 24 16: 16: 45 ] Cliente 2: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 45 ] cajero 2: Atendiendo a  Cliente 2
+[ 06/ 12/ 24 16: 16: 46 ] Cliente 3: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 46 ] cajero 1: Atendiendo a  Cliente 3
+[ 06/ 12/ 24 16: 16: 46 ] Cliente 4: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 46 ] cajero 3: Atendiendo a  Cliente 4
+[ 06/ 12/ 24 16: 16: 46 ] Cliente 5: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 46 ] Cliente 6: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 47 ] Cliente 7: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 47 ] Cliente 8: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 47 ] Cliente 9: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 48 ] Cliente 10: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 48 ] Cliente 11: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 48 ] Cliente 12: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 48 ] Cliente 13: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 49 ] Cliente 14: ha entrado a la tienda
+[ 06/ 12/ 24 16: 16: 49 ] reponedor: Cliente 4 solicita consultar un precio
+[ 06/ 12/ 24 16: 16: 49 ] cajero 2: acabo de atender a Cliente 2
+[ 06/ 12/ 24 16: 16: 49 ] cajero 2: Atendiendo a  Cliente 5
+[ 06/ 12/ 24 16: 16: 51 ] reponedor: Cliente 3 solicita consultar un precio
+[ 06/ 12/ 24 16: 16: 51 ] cajero 4: acabo de atender a Cliente 1
+[ 06/ 12/ 24 16: 16: 51 ] cajero 4: Atendiendo a  Cliente 6
+[ 06/ 12/ 24 16: 16: 53 ] cajero 2: acabo de atender a Cliente 5
+[ 06/ 12/ 24 16: 16: 53 ] cajero 2: Atendiendo a  Cliente 7
+[ 06/ 12/ 24 16: 16: 54 ] Cliente 14: se canso de no ser atendido y se fue
+[ 06/ 12/ 24 16: 16: 54 ] cajero 4: acabo de atender a Cliente 6
+[ 06/ 12/ 24 16: 16: 54 ] cajero 4: Atendiendo a  Cliente 8
+[ 06/ 12/ 24 16: 16: 56 ] Cliente 11: se canso de no ser atendido y se fue
+[ 06/ 12/ 24 16: 16: 57 ] Cliente 10: se canso de no ser atendido y se fue
+[ 06/ 12/ 24 16: 16: 57 ] reponedor: acaba de consultar el precio
+[ 06/ 12/ 24 16: 16: 57 ] cajero 3: acabo de atender a Cliente 4
+[ 06/ 12/ 24 16: 16: 57 ] cajero 3: Atendiendo a  Cliente 9
+[ 06/ 12/ 24 16: 16: 57 ] reponedor: Cliente 7 solicita consultar un precio
+[ 06/ 12/ 24 16: 16: 58 ] cajero 4: acabo de atender a Cliente 8
+[ 06/ 12/ 24 16: 16: 58 ] cajero 4: Atendiendo a  Cliente 12
+[ 06/ 12/ 24 16: 17: 01 ] Cliente 13: se canso de no ser atendido y se fue
+[ 06/ 12/ 24 16: 17: 02 ] reponedor: acaba de consultar el precio
+[ 06/ 12/ 24 16: 17: 02 ] cajero 1: acabo de atender a Cliente 3
+[ 06/ 12/ 24 16: 17: 02 ] cajero 4: acabo de atender a Cliente 12
+[ 06/ 12/ 24 16: 17: 07 ] cajero 3: acabo de atender a Cliente 9
+[ 06/ 12/ 24 16: 17: 07 ] reponedor: acaba de consultar el precio
+[ 06/ 12/ 24 16: 17: 07 ] cajero 2: acabo de atender a Cliente 7

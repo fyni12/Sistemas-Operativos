@@ -393,11 +393,6 @@ int main()
     pthread_create(&reponedor_hilo, NULL, reponedor, NULL);
     pthread_detach(reponedor_hilo);
 
-    for (int i = 0; i < 70; i++)
-    {
-        createClient();
-        sleep(.1f);
-    }
 
     while (1)
     {
