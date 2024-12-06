@@ -26,9 +26,9 @@ typedef struct
     char id[20];
     int estado;
 } cliente;
+
 cliente *cola;
 
-// lista de clientes y cajeros
 
 void cleanLogger()
 {
@@ -113,10 +113,12 @@ void mostrarClientes()
 void *clientAlarm(void *id)
 {
 
-    sleep(rand() % 10 + 5); // duerme un tiempo random
+    sleep(rand() % 20 + 10); // espera un tiempo random
 
-    pthread_mutex_lock(&mutex_cola); // TODO  reajustar los mutex
 
+    
+    pthread_mutex_lock(&mutex_cola);
+    
     int pos = findClient(id);
 
     printf("se acabo la espera del cliente %s\n", (char *)id);
@@ -130,18 +132,17 @@ void *clientAlarm(void *id)
 
             pthread_mutex_unlock(&mutex_cola);
             writeLog(id, "se canso de no ser atendido y se fue");
+        }else{
+            pthread_mutex_unlock(&mutex_cola);
+
         }
     }
-    else
-    {
-
+    else{
         pthread_mutex_unlock(&mutex_cola);
-        writeLog("ERROR", "no se encontro el cliente que se queria eliminar");
-        printf("ERROR AL ELIMINAR UN CLIENTE CON UNA ALARMA\n");
     }
 }
 
-int findEmptyPos() //! NO TIENE MUTEX
+int findEmptyPos() // encuentra una posicion de la cola vacia //! NO TIENE MUTEX 
 {
     int pos = -1;
     int i = 0;
@@ -203,12 +204,14 @@ void *createClient()
 
 void handlerClient()
 {
+
+    //lanza un hilo que crea clientes y se desentiende de el
     pthread_t hilo;
     pthread_create(&hilo, NULL, createClient, NULL);
     pthread_detach(hilo);
 }
 
-int clientAvaileable() //! NO TIENE MUTEX
+int clientAvaileable() //encuentra un cliente no atendido //! NO TIENE MUTEX
 {
     int i=0;
     int pos = -1;
@@ -225,25 +228,25 @@ int clientAvaileable() //! NO TIENE MUTEX
     return pos;
 }
 
-void *reponedor()
+void *reponedor()//ejecuta la funcion del reponedor
 {
 
     while (1)
     {
 
-        pthread_mutex_lock(&mutex_reponedor);
+        pthread_mutex_lock(&mutex_reponedor);//bloquea el mutex
 
-        pthread_cond_wait(&condicion_reponedor, &mutex_reponedor);
+        pthread_cond_wait(&condicion_reponedor, &mutex_reponedor); //espera a que se lo requiera
         int tiempo = rand() % 10 + 5; // tarda entre 5 y 15 segundos
-        // sleep(tiempo);
+        sleep(tiempo);
 
-        pthread_cond_signal(&condicion_reponedor);
+        pthread_cond_signal(&condicion_reponedor); //avisa de que ya hizo su funcion
 
         pthread_mutex_unlock(&mutex_reponedor);
     }
 }
 
-void *cajero(void *idCajero)
+void *cajero(void *idCajero) 
 {
 
     int clientesAtendidos = 0;
@@ -255,10 +258,11 @@ void *cajero(void *idCajero)
     while (1)
     {
         pthread_mutex_lock(&mutex_cola);
+        
         int posicionCliente = clientAvaileable();
         if (posicionCliente != -1)
         {
-
+            sleep(.1f); //para que no se ecriba el log antes de que se cree el cliente
             cola[posicionCliente].estado = 1;
             char idCliente[20];
             strcpy(idCliente, cola[posicionCliente].id);
@@ -276,7 +280,7 @@ void *cajero(void *idCajero)
             tiempoEspera = rand() % 10 + 2;
             probcliente = rand() % 101;
 
-            // sleep(tiempoEspera);              //!HAY QUE HACER EL TIEMPO DE ESPERA
+            sleep(tiempoEspera);              //!HAY QUE HACER EL TIEMPO DE ESPERA
 
             if (probcliente > 70 && probcliente <= 95)
             {
@@ -322,6 +326,7 @@ void *cajero(void *idCajero)
             }
 
             pthread_mutex_lock(&mutex_cola);
+            
             removeClient(findClient(idCliente));
             pthread_mutex_unlock(&mutex_cola);
             printf("!!se atendio a %s ¡¡\n ", idCliente);
@@ -358,7 +363,7 @@ int main()
         cola[i].estado = 0;
     }
 
-    printf("%d\n", findEmptyPos());
+
 
     // se redefine el comportamiento de sigur1
     struct sigaction sa;
@@ -370,7 +375,7 @@ int main()
     pthread_mutex_init(&mutex_reponedor, NULL);
     pthread_cond_init(&condicion_reponedor, NULL);
 
-    printf("%d\n", getpid());
+    printf("pid: %d\n", getpid());
 
     for (int i = 0; i < n_cajeros; i++)
     {
@@ -409,9 +414,4 @@ int main()
     return 0;
 }
 
-// TODO HACER QUE LOS CLIENTES CONSUMAN CAJEROS
-// TODO hay que eliminar el hilo que crea a los clientes
-// TODO HACER LA CAPTURA DEL CTRL C PARA PREGUNTAR SI QUIERES SALIR
 
-//! importante
-// TODO VOLVER A PONER LOS SLEEPS
