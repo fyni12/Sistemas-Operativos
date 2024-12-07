@@ -23,7 +23,7 @@ int executeSecondPlane(char **tokens, int entrada, int salida);
 char *trim(char *str);
 void executePipes(char **tokens, int tokensLenght);
 
-void genericTokenize(char *str, char **tokens, int *num_tokens, char *separator)
+void genericTokenize(char *str, char **tokens, int *num_tokens, char *separator) // DEVUELVE UN ARRAY DE STRINGS CON LAS DISTINTAS PALABRAS TENIENDO COMO CRTITERIO DE SEPARACION EL SEPARADOR
 {
     *num_tokens = 0;
     char *tok = strtok(str, separator);
@@ -48,12 +48,12 @@ void genericTokenize(char *str, char **tokens, int *num_tokens, char *separator)
 
 int main()
 {
-    char str[1024];
+    char str[1024]; // SE DEFINENE LOS ELEMENTOS DEL GENERIC TOKENIZE
     char *tokens[MAX_TOKENS];
     int num_tokens;
     int len;
 
-    struct sigaction nombre;
+    struct sigaction nombre; // SE DEFINE EL MANEJADOR DE LA SEÑAL
 
     nombre.sa_handler = handler;
     sigaction(SIGINT, &nombre, NULL);
@@ -61,30 +61,30 @@ int main()
     while (bucle)
     {
         fflush(stdout);
-        printf(">>");
+        7 printf(">>"); // SE LEE LA ENTRADA
         fflush(stdout);
-        fgets(str, sizeof(str), stdin);
+        fgets(str, sizeof(str), stdin); // SE ALMACENA EN STR
         len = strlen(str);
 
-        str[strlen(str) - 1] = '\0';
+        str[len - 1] = '\0'; // SE CAMBIA EL ULTIMO CARACTER
 
-        trim(str);
+        trim(str); // SE ELIMINAN LOS ESPACION DEL PRINCIPIO Y DEL FINAL
 
         fflush(stdout);
         len = strlen(str);
-        if (len != 0 && intentoSalida == 0)
+        if (len != 0 && intentoSalida == 0) // SE COMPRUEBA QUE EL BUFFER NO ESTE VACIO Y QUE NO SE HAYA INTENTADO SALIR
         {
 
-            genericTokenize(str, tokens, &num_tokens, "|");
+            genericTokenize(str, tokens, &num_tokens, "|"); // SE SEPARA EL STRING POR '|'
 
-            executePipes(tokens, num_tokens);
+            executePipes(tokens, num_tokens); // SE MANDA LA EJECUCION DE LOS COMANDOS
         }
         intentoSalida = 0;
     }
     return 0;
 }
 
-void handler()
+void handler() // SE PREGUNTA SI SE QUIERE SALIR
 {
     char eleccion;
 
@@ -101,7 +101,7 @@ void handler()
 
 void executeOne(char **tokens, int entrada, int salida)
 {
-
+    // ESTE HILO LO QUE HACE ES LANZAR UN PROCESO HUJO AL QUE SE LE REDEFINE LA ENTRADA Y LA SALIDA A LOS DESCRIPTORES DE ARCHIVO, QUE DE NORMAL SON STDIN Y STDOUT Y ESPERA A QUE ACABE LA EJECUCION DE ESE HILO
     int result;
     int hijo = fork();
 
@@ -125,6 +125,7 @@ void executeOne(char **tokens, int entrada, int salida)
 
 int executeSecondPlane(char **tokens, int entrada, int salida)
 {
+    // ESTE HILO LO QUE HACE ES LANZAR UN PROCESO HUJO AL QUE SE LE REDEFINE LA ENTRADA Y LA SALIDA A LOS DESCRIPTORES DE ARCHIVO, QUE DE NORMAL SON STDIN Y STDOUT Y NO ESPERA A QUE ACABE LA EJECUCION DE ESE HILO
 
     int hijo = fork();
     if (hijo == 0)
@@ -176,11 +177,11 @@ void executePipes(char **tokens, int tokensLenght)
     char *subTokens[MAX_TOKENS];
     int subNum_tokens;
 
-    if (tokensLenght == 1)
+    if (tokensLenght == 1) //EN EL CASO DE QUE SOLO HAYA UN COMANDO 
     {
         genericTokenize(tokens[tokensLenght - 1], subTokens, &subNum_tokens, " ");
 
-        if (subTokens[subNum_tokens - 1][strlen(subTokens[subNum_tokens - 1]) - 1] == '&')
+        if (subTokens[subNum_tokens - 1][strlen(subTokens[subNum_tokens - 1]) - 1] == '&') //SE COMPRUEBA SI EL ULTIMO CARACTER ES UN AMPERSON Y SE ELIMINA PARA EJECUTAR EL COMANDO EN SEGUNDO PLANO
         {
             subTokens[subNum_tokens - 1][strlen(subTokens[subNum_tokens - 1]) - 1] = '\0';
             executeSecondPlane(subTokens, STDIN_FILENO, STDOUT_FILENO);
@@ -198,7 +199,7 @@ void executePipes(char **tokens, int tokensLenght)
         for (int i = 0; i < tokensLenght - 1; i++)
         {
             totalPipes[i] = (int *)malloc(2 * sizeof(int));
-        }
+        } //SE CREANT TODAS LAS TUBERIAS NECESARIAS
 
         for (int i = 0; i < tokensLenght - 1; i++)
         {
@@ -207,7 +208,7 @@ void executePipes(char **tokens, int tokensLenght)
 
         // primer ejecutar y ultimo tienen que estar definidos a mano
 
-        for (int i = 0; i < tokensLenght; i++)
+        for (int i = 0; i < tokensLenght; i++) //SE ITERA SOBRE TODOS LOS COMANDOS ASIGNANDOLES LAS TUBERIAS CORRESPONDIENTES
         {
             genericTokenize(tokens[i], subTokens, &subNum_tokens, " ");
 
