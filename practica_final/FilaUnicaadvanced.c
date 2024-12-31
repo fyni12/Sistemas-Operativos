@@ -13,6 +13,12 @@
 int n_clientes = 20;
 int n_cajeros = 3;
 
+pthread_t *cajeros;
+
+int *clientesAtendidosTotal;
+
+int fin = 1;
+
 char *logPath;
 FILE *logFile;
 
@@ -111,7 +117,7 @@ void mostrarClientes()
 void *clientAlarm(void *id)
 {
 
-    sleep(rand() % 10 + 5); // espera un tiempo random
+    sleep(10); // espera un tiempo random
 
     pthread_mutex_lock(&mutex_cola);
 
@@ -190,9 +196,12 @@ void *createClient()
         printf("creando cliente %d en la posicion %d\n", numeroCliente, pos);
 
         char *clidup = strdup(cli);
-
-        pthread_create(&hilo, NULL, clientAlarm, (void *)clidup);
-        pthread_detach(hilo);
+        if (rand() % 10 == 1)
+        {
+            // solo tiene un 10% de probabilidades de abandonar la fila
+            pthread_create(&hilo, NULL, clientAlarm, (void *)clidup);
+            pthread_detach(hilo);
+        }
     }
     else
     {
@@ -220,13 +229,13 @@ int clientAvaileable() // encuentra un cliente no atendido //! NO TIENE MUTEX
 void *reponedor() // ejecuta la funcion del reponedor
 {
 
-    while (1)
+    while (fin)
     {
 
         pthread_mutex_lock(&mutex_reponedor); // bloquea el mutex
 
         pthread_cond_wait(&condicion_reponedor, &mutex_reponedor); // espera a que se lo requiera
-        int tiempo = rand() % 10 + 5;                              // tarda entre 5 y 15 segundos
+        int tiempo = rand() % 5 + 1;                               // tarda entre 5 y 15 segundos
         sleep(tiempo);
 
         pthread_cond_signal(&condicion_reponedor); // avisa de que ya hizo su funcion
@@ -235,17 +244,45 @@ void *reponedor() // ejecuta la funcion del reponedor
     }
 }
 
+int ultimosNums(char * entrada){
+
+    int n=strlen(entrada);
+    int salida=0;
+
+    int j=1;
+
+    for(int i=n-1; i>0; i--){
+        
+        if(entrada[i]== ' '){
+            break;;
+        }
+        int temp=entrada[i]-'0';
+        salida+=j*temp;
+        j*=10;
+    }
+
+    return salida;
+
+
+}
+
 void *cajero(void *idCajero)
 {
 
     int clientesAtendidos = 0;
     char *idCliente;
     int tiempoEspera, probcliente;
-    pthread_t dependiente;
+    
+    int n=ultimosNums(idCajero);
+
+
+
+    
 
     printf("Se creo el %s\n", (char *)idCajero);
-    while (1)
+    while (fin)
     {
+        sleep(.2f);
         pthread_mutex_lock(&mutex_cola);
         int posicionCliente = clientAvaileable();
         if (posicionCliente != -1)
@@ -265,7 +302,7 @@ void *cajero(void *idCajero)
 
             // atencion del cliente
 
-            tiempoEspera = rand() % 10 + 2;
+            tiempoEspera = rand() % 5 + 1;
             probcliente = rand() % 101;
 
             sleep(tiempoEspera); //! HAY QUE HACER EL TIEMPO DE ESPERA
@@ -296,7 +333,7 @@ void *cajero(void *idCajero)
 
                 writeLog("reponedor", "acaba de consultar el precio");
 
-                sprintf(descripcionCajero, "acabo de atender a %s", idCliente);
+                sprintf(descripcionCajero, "acabo de atender a %s,la compra tenia un precio de %d€", idCliente, rand() % 100 + 1);
                 writeLog(idCajero, descripcionCajero);
             }
             else if (probcliente > 95)
@@ -309,7 +346,7 @@ void *cajero(void *idCajero)
             else
             {
                 // todo bien
-                sprintf(descripcionCajero, "acabo de atender a %s", idCliente);
+                sprintf(descripcionCajero, "acabo de atender a %s,la compra tenia un precio de %d€", idCliente, rand() % 100 + 1);
                 writeLog(idCajero, descripcionCajero);
             }
 
@@ -319,6 +356,8 @@ void *cajero(void *idCajero)
             printf("!!se atendio a %s ¡¡\n ", idCliente);
 
             clientesAtendidos++;
+            clientesAtendidosTotal[n-1]++;
+
         }
         else
         {
@@ -360,8 +399,8 @@ void *addCajero()
     static int nCaj = 0;
 
     pthread_mutex_lock(&mutex_cajero);
-
     nCaj++;
+
     pthread_t cajero_hilo;
 
     char cajeroid[20];
@@ -369,12 +408,39 @@ void *addCajero()
 
     char *cajeroiddup = strdup(cajeroid);
 
+    pthread_create(&cajero_hilo, NULL, cajero, cajeroiddup);
+
+    cajeros[nCaj - 1] = cajero_hilo;
+
     pthread_mutex_unlock(&mutex_cajero);
 
-    pthread_create(&cajero_hilo, NULL, cajero, cajeroiddup);
-    pthread_detach(cajero_hilo);
-
     writeLog("SYSTEM", "Se ha añadido un cajero");
+}
+
+void *expandCajeros()
+{
+
+    pthread_mutex_lock(&mutex_cajero);
+    n_cajeros++;
+    pthread_t *temp = (pthread_t *)malloc(sizeof(pthread_t) * n_cajeros);
+    int *temp2 = (int *)malloc(sizeof(int) * n_cajeros);
+
+    for (int i = 0; i < n_cajeros - 1; i++)
+    {
+        temp[i] = cajeros[i];
+        temp2[i]=clientesAtendidosTotal[i];
+    }
+    temp2[n_cajeros-1]=0;
+
+    free(cajeros);
+    free(clientesAtendidosTotal);
+
+    cajeros = temp;
+    clientesAtendidosTotal=temp2;
+
+    pthread_mutex_unlock(&mutex_cajero);
+
+    addCajero();
 }
 
 void handlerClient()
@@ -388,8 +454,9 @@ void handlerClient()
 
 void handlerCajero()
 {
+
     pthread_t hilo;
-    pthread_create(&hilo, NULL, addCajero, NULL);
+    pthread_create(&hilo, NULL, expandCajeros, NULL);
     pthread_detach(hilo);
 }
 
@@ -399,6 +466,28 @@ void handlerCola()
     pthread_t hilo;
     pthread_create(&hilo, NULL, resizeQueue, NULL);
     pthread_detach(hilo);
+}
+
+
+
+void handlerfin()
+{
+    writeLog("Supermercado", "se ha cerrado el supermercado");
+
+    fin = 0;
+}
+
+void logCajerosResult()
+{
+    for (int i = 0; i < n_cajeros; i++)
+    {
+        char cajero[20];
+        char msg[100];
+
+        sprintf(cajero, "cajero %d", i+1);
+        sprintf(msg, "Atendio a %d clientes y se va", clientesAtendidosTotal[i]);
+        writeLog(cajero, msg);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -428,7 +517,11 @@ int main(int argc, char *argv[])
         cola[i].estado = 0;
     }
 
-    printf("%d\n", findEmptyPos());
+    clientesAtendidosTotal= (int *) malloc(sizeof(int)*n_cajeros);
+
+    for(int i=0; i<n_cajeros;i++){
+        clientesAtendidosTotal[i]=0;
+    }
 
     // se redefine el comportamiento de sigur1
     struct sigaction clientSignal;
@@ -442,6 +535,10 @@ int main(int argc, char *argv[])
     struct sigaction cashierSignal;
     cashierSignal.sa_handler = handlerCajero;
     sigaction(SIGPIPE, &cashierSignal, NULL);
+    
+    struct sigaction finalsignal;
+    finalsignal.sa_handler = handlerfin;
+    sigaction(SIGINT, &finalsignal, NULL);
 
     pthread_mutex_init(&mutex_log, NULL);
     pthread_mutex_init(&mutex_cola, NULL);
@@ -450,6 +547,8 @@ int main(int argc, char *argv[])
     pthread_cond_init(&condicion_reponedor, NULL);
 
     printf("pid: %d\n", getpid());
+
+    cajeros = (pthread_t *)malloc(sizeof(pthread_t) * n_cajeros);
 
     for (int i = 0; i < n_cajeros; i++)
     {
@@ -460,11 +559,20 @@ int main(int argc, char *argv[])
     pthread_create(&reponedor_hilo, NULL, reponedor, NULL);
     pthread_detach(reponedor_hilo);
 
-    while (1)
+    
+
+    while (fin)
     {
-        // mostrarClientes();
         pause();
     }
+
+    for (int i = 0; i < n_cajeros; i++)
+    {
+        pthread_cancel(cajeros[i]);
+    }
+    pthread_cancel(reponedor_hilo);
+
+    logCajerosResult();
 
     pthread_mutex_destroy(&mutex_log);
     pthread_mutex_destroy(&mutex_cola);
