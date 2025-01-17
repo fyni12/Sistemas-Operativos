@@ -13,6 +13,8 @@
 int n_clientes = 20;
 int n_cajeros = 3;
 
+int cajeros_solicitar=0;
+
 int *clientesAtendidosTotal;
 
 char *logPath;
@@ -20,7 +22,7 @@ FILE *logFile;
 
 int fin = 1;
 
-pthread_cond_t condicion_reponedor;
+pthread_cond_t condicion_reponedor, condicion_cajero;
 
 pthread_mutex_t mutex_log, mutex_cola, mutex_reponedor;
 
@@ -242,15 +244,14 @@ void *reponedor() // ejecuta la funcion del reponedor
     while (fin)
     {
 
-        pthread_mutex_lock(&mutex_reponedor); // bloquea el mutex
-
-        pthread_cond_wait(&condicion_reponedor, &mutex_reponedor); // espera a que se lo requiera
+        pthread_mutex_lock(&mutex_reponedor); // bloquea el mute
+        if(cajeros_solicitar==0) pthread_cond_wait(&condicion_reponedor, &mutex_reponedor); // espera a que se lo requiera
+        pthread_mutex_unlock(&mutex_reponedor);
         int tiempo = rand() % 5 + 1;                               // tarda entre 1 y 5 segundos
         sleep(tiempo);
 
-        pthread_cond_signal(&condicion_reponedor); // avisa de que ya hizo su funcion
 
-        pthread_mutex_unlock(&mutex_reponedor);
+        pthread_cond_signal(&condicion_cajero); // avisa de que ya hizo su funcion
     }
 }
 
@@ -299,20 +300,18 @@ void *cajero(void *idCajero)
                 sprintf(descripcionCajero, "%s solicita consultar un precio", idCliente);
                 writeLog("reponedor", descripcionCajero);
                 pthread_mutex_lock(&mutex_reponedor);
-                int var = prioridad;
-                prioridad++;
 
-                do
-                {
-                    pthread_cond_signal(&condicion_reponedor);
+                cajeros_solicitar++;
+                
+                pthread_mutex_unlock(&mutex_reponedor);
 
-                    pthread_cond_wait(&condicion_reponedor, &mutex_reponedor);
+                pthread_cond_signal(&condicion_reponedor);
 
-                    var--;
+                pthread_mutex_lock(&mutex_reponedor);
+                pthread_cond_wait(&condicion_cajero, &mutex_reponedor);
 
-                } while (var > 0 && fin);
+                cajeros_solicitar--;
 
-                prioridad--;
 
                 pthread_mutex_unlock(&mutex_reponedor);
 
@@ -400,6 +399,7 @@ int main()
     pthread_mutex_init(&mutex_cola, NULL);
     pthread_mutex_init(&mutex_reponedor, NULL);
     pthread_cond_init(&condicion_reponedor, NULL);
+    pthread_cond_init(&condicion_cajero, NULL);
 
     printf("pid: %d\n", getpid());
 
